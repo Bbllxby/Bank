@@ -1,0 +1,55 @@
+local visitedRooms = {}
+
+local function teleportToRandomRoom()
+    local generatedBackrooms = game.Workspace.__THINGS.__INSTANCE_CONTAINER.Active.Backrooms.GeneratedBackrooms
+    local rooms = {}
+
+    for _, room in ipairs(generatedBackrooms:GetChildren()) do
+        if room.Name ~= "Walls" and room.Name ~= "SpawnRoom" and room.Name ~= "Obby2" then
+            table.insert(rooms, room)
+        end
+    end
+
+    for _, roomCFrame in ipairs(visitedRooms) do
+        for i, room in ipairs(rooms) do
+            if room.Baseplate.CFrame == roomCFrame then
+                table.remove(rooms, i)
+                break
+            end
+        end
+    end
+
+    if #rooms == 0 then
+        print("All rooms visited.")
+        return
+    end
+
+    local randomRoom = rooms[math.random(1, #rooms)]
+    local baseplate = randomRoom:FindFirstChild("Baseplate")
+
+    if baseplate then
+        game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(baseplate.CFrame)
+        table.insert(visitedRooms, baseplate.CFrame)
+    end
+end
+
+local function findAndTeleportToBankHeistRoom(parent)
+    for _, child in ipairs(parent:GetChildren()) do
+        if child.Name == "BankHeistRoom" then
+            local pad = child.Bank:FindFirstChild("Pad")
+            if pad then
+                game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(pad.CFrame)
+                wait(0.5)
+                child:Destroy()
+            end
+        end
+    end
+end
+
+teleportToRandomRoom()
+
+while true do
+    wait(0.2)
+    teleportToRandomRoom()
+    findAndTeleportToBankHeistRoom(game.Workspace.__THINGS.__INSTANCE_CONTAINER.Active.Backrooms.GeneratedBackrooms)
+end
